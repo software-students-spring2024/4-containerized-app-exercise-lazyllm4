@@ -2,10 +2,11 @@
 <html>
 <head>
     <title>Dashboard - Smart Home Security</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
     <h1>Dashboard</h1>
-    <p>Welcome, {{ username }}.</p>
+    <p>Welcome home, {{ username }}.</p>
 
     {% if users_list %}
         <h2>Registered Users</h2>
