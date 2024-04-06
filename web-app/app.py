@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from bson.objectid import ObjectId
 from pymongo import MongoClient
 from flask import (
-    Flask, render_template, request, redirect, url_for, flash  
+    Flask, render_template, request, redirect, url_for, flash
 )
 from flask_login import (
     LoginManager, UserMixin, login_user, login_required, logout_user, current_user
@@ -97,7 +97,7 @@ def login():
             user_obj = User(str(user['_id']), user['username'], user.get("is_admin", False))
             login_user(user_obj)
             return redirect(url_for('dashboard'))
-        flash('Invalid username or password', 'error') 
+        flash('Invalid username or password', 'error')
 
     return render_template('login.html')
 
