@@ -6,78 +6,21 @@
 <body>
     <h1>Dashboard</h1>
     <p>Welcome, {{ username }}.</p>
-    
+
     {% if users_list %}
         <h2>Registered Users</h2>
         <ul>
             {% for user in users_list %}
-                <li>{{ user.username }}</li>
+                <li>{{ user.username }}
+                    <form action="/delete_user/{{ user._id }}" method="post" style="display:inline;">
+                        <input type="submit" value="Delete"/>
+                    </form>
+                </li>
             {% endfor %}
         </ul>
         <p><a href="/register">Register New User</a></p>
     {% endif %}
-    
+
     <a href="/logout">Logout</a>
 </body>
 </html>
-
-
-
-<!-- <!DOCTYPE html>
-<html>
-<head>
-    <title>Dashboard - Smart Home Security</title>
-</head>
-<body>
-    <h1>Dashboard</h1>
-    <p>Welcome, {{ current_user.username }}.</p>
-
-    {% if current_user.is_admin %}
-        <p><a href="/register">Register New User</a></p>
-    {% endif %}
-    
-    <a href="/logout">Logout</a>
-</body>
-</html> -->
-
-
-<!-- <!DOCTYPE html>
-<html>
-<head>
-    <title>Dashboard - Smart Home Security</title>
-</head>
-<body>
-    <h1>Dashboard</h1>
-    <p>Welcome, {{ username }}. This is your dashboard.</p>
-    
-    {% if current_user.is_admin %}
-        <p><a href="/register">Register New User</a></p>
-    {% endif %}
-    
-    <a href="/logout">Logout</a>
-</body>
-</html> -->
-
-<!-- <!DOCTYPE html>
-<html>
-<head>
-    <title>Dashboard - Smart Home Security</title>
-</head>
-<body>
-    <h1>Dashboard</h1>
-    
-    
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <div class="flash {{ category }}">{{ message }}</div>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
-    
-    <p>Welcome to your dashboard, {{ current_user.username }}.</p>
-    <a href="/logout">Logout</a>
-</body>
-</html> -->
-
-
