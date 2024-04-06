@@ -1,4 +1,5 @@
 """Main module for the Flask web application."""
+
 import os
 from dotenv import load_dotenv
 from bson.objectid import ObjectId
