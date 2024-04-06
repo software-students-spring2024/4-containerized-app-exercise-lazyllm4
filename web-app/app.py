@@ -147,5 +147,18 @@ def register():
     return render_template("register.html")
 
 
+@app.route("/delete_user/<user_id>", methods=["POST"])
+@login_required
+def delete_user(user_id):
+    """Delete a user by ID."""
+    if not current_user.is_admin:
+        flash("Only admins can delete users.")
+        return redirect(url_for("dashboard"))
+
+    users_collection.delete_one({"_id": ObjectId(user_id)})
+    # flash("User deleted successfully.", "info")
+    return redirect(url_for("dashboard"))
+
+
 if __name__ == "__main__":
     app.run(debug=True)
