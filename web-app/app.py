@@ -119,7 +119,7 @@ def register():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        
+
         hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
         users_collection.insert_one({
             'username': username,
