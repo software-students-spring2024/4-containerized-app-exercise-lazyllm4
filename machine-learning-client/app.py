@@ -1,3 +1,6 @@
+"""
+This script is used to detect motion using a camera and OpenCV, and log the motion events into a MongoDB database.
+"""
 import os
 import datetime
 import cv2
@@ -27,12 +30,12 @@ while cap.isOpened():
     dilated = cv2.dilate(thresh, None, iterations=3)
     contours, _ = cv2.findContours(dilated, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
-    motion_detected = False
+    MOTION_DETECTED = False
 
     for contour in contours:
         if cv2.contourArea(contour) < 900:
             continue
-        motion_detected = True
+        MOTION_DETECTED = True
         (x, y, w, h) = cv2.boundingRect(contour)
         cv2.rectangle(frame1, (x, y), (x+w, y+h), (0, 255, 0), 2)
         cv2.putText(frame1, f"Status: {'Movement'}", (10, 20), cv2.FONT_HERSHEY_SIMPLEX,
