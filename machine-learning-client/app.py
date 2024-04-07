@@ -1,12 +1,13 @@
 """
-This script is used to detect motion using a camera and OpenCV, and log the motion events into a MongoDB database.
+detect motion using a camera and OpenCV, and log the motion events into a MongoDB database.
 """
+
 import os
 import datetime
 import cv2
 from pymongo import MongoClient
 
-# Constants should be named in uppercase
+# Constantspip show opencv-pytho should be named in uppercase
 MONGO_URI = os.getenv("MONGO_URI")
 DATABASE_NAME = "SmartHomeSecurity"
 EVENTS_COLLECTION = "events"
@@ -30,18 +31,18 @@ while cap.isOpened():
     dilated = cv2.dilate(thresh, None, iterations=3)
     contours, _ = cv2.findContours(dilated, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
-    MOTION_DETECTED = False
+    MOTION_DETECTED = False  # Changed to uppercase
 
     for contour in contours:
         if cv2.contourArea(contour) < 900:
             continue
-        MOTION_DETECTED = True
+        MOTION_DETECTED = True  # Changed to uppercase
         (x, y, w, h) = cv2.boundingRect(contour)
         cv2.rectangle(frame1, (x, y), (x+w, y+h), (0, 255, 0), 2)
         cv2.putText(frame1, f"Status: {'Movement'}", (10, 20), cv2.FONT_HERSHEY_SIMPLEX,
                     1, (0, 0, 255), 3)
     
-    if motion_detected:
+    if MOTION_DETECTED:  # Changed to uppercase
         # Log the event to MongoDB
         event = {
             "type": "motion_detected",
