@@ -11,7 +11,7 @@ client = MongoClient(mongo_uri, tls=True, tlsAllowInvalidCertificates=True)
 db = client["SmartHomeSecurity"]
 events_collection = db['events']
 #print(pymongo.__version__)
-print("Application started successfully.")
+#print("Application started successfully.")
 
 
 cap = cv2.VideoCapture(0)
