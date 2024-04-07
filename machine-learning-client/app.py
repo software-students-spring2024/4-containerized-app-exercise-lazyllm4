@@ -2,20 +2,20 @@
 detect motion using a camera and OpenCV, and log the motion events into a MongoDB database.
 """
 
-import os
-import datetime
+# import os
+# import datetime
 # import cv2
 # from pymongo import MongoClient
 
 # Constantspip show opencv-pytho should be named in uppercase
-MONGO_URI = os.getenv("MONGO_URI")
-DATABASE_NAME = "SmartHomeSecurity"
-EVENTS_COLLECTION = "events"
+# MONGO_URI = os.getenv("MONGO_URI")
+# DATABASE_NAME = "SmartHomeSecurity"
+# EVENTS_COLLECTION = "events"
 
 # Setup MongoDB connection
-client = MongoClient(MONGO_URI, tls=True, tlsAllowInvalidCertificates=True)
-db = client[DATABASE_NAME]
-events_collection = db[EVENTS_COLLECTION]
+# client = MongoClient(MONGO_URI, tls=True, tlsAllowInvalidCertificates=True)
+# db = client[DATABASE_NAME]
+# events_collection = db[EVENTS_COLLECTION]
 
 # # Initialize camera
 # cap = cv2.VideoCapture(0)
