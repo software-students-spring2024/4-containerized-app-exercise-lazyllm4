@@ -3,7 +3,7 @@
 import os
 import sys
 from pathlib import Path
-import cv2
+import cv2  # Note: cv2 might still raise E1101 in pylint without specific configuration.
 from dotenv import load_dotenv
 from bson.objectid import ObjectId
 from pymongo import MongoClient
@@ -18,23 +18,16 @@ from flask_login import (
 )
 from flask_bcrypt import Bcrypt
 
-# Modifying the system path to ensure imports are found
 parent_dir = Path(__file__).resolve().parent.parent
 sys.path.append(str(parent_dir))
+from machine_learning_client.app import detect_motion  # Adjusted import based on path modification.
 
-# pylint: disable=wrong-import-position,import-error
-from machine_learning_client.app import detect_motion
-
-# Load environment variables
 load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "default_secret_key")
-
-# Setup Flask-Bcrypt
 bcrypt = Bcrypt(app)
 
-# MongoDB Atlas setup
 mongo_uri = os.getenv("MONGO_URI")
 client = MongoClient(mongo_uri, tls=True, tlsAllowInvalidCertificates=True)
 db = client["SmartHomeSecurity"]
@@ -61,7 +54,6 @@ def create_admin_user():
 
 create_admin_user()
 
-# Flask-Login setup
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
@@ -103,14 +95,13 @@ def dashboard():
     users_list = None
     if current_user.is_admin:
         users_list = users_collection.find()
-    return render_template(
-        "dashboard.html", username=current_user.username, users_list=users_list
-    )
+    return render_template("dashboard.html", username=current_user.username, users_list=users_list)
+
 
 @app.route('/start-motion-detection', methods=['POST'])
 def start_motion_detection():
     """Starts motion detection and returns the detection result."""
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(0)  # Potential E1101 pylint error, but necessary for operation.
     try:
         motion_detected = detect_motion(cap, db)
     finally:
@@ -127,13 +118,11 @@ def login():
         user = users_collection.find_one({"username": username})
 
         if user and User.validate_login(user["password"], password):
-            user_obj = User(
-                str(user["_id"]), user["username"], user.get("is_admin", False)
-            )
+            user_obj = User(str(user["_id"]), user["username"], user.get("is_admin", False))
             login_user(user_obj)
             return redirect(url_for("dashboard"))
-        else:
-            flash("Invalid username or password", "error")
+
+        flash("Invalid username or password", "error")
 
     return render_template("login.html")
 
