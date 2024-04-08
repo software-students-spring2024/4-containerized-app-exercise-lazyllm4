@@ -4,6 +4,7 @@ import os
 import sys
 from pathlib import Path
 import cv2
+from cv2 import VideoCapture
 from dotenv import load_dotenv
 from bson.objectid import ObjectId
 from pymongo import MongoClient
@@ -110,7 +111,7 @@ def dashboard():
 @app.route('/start-motion-detection', methods=['POST'])
 def start_motion_detection():
     """Starts motion detection and returns the detection result."""
-    cap = cv2.VideoCapture(0)
+    cap = VideoCapture(0)
     try:
         motion_detected = detect_motion(cap, db)
     finally:
