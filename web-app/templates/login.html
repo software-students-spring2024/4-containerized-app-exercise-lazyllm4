@@ -15,12 +15,41 @@
         {% endif %}
     {% endwith %}
 
-    <form action="/login" method="post">
+    <form action="/login" method="post" id="login-form">
         <label for="username">Username:</label>
         <input type="text" id="username" name="username" required>
         <label for="password">Password:</label>
         <input type="password" id="password" name="password" required>
-        <button type="submit">Login</button>
+        <button type="submit" id="login-button">Login</button>
     </form>
+
+    <script>
+        function checkForMotion() {
+            fetch('/start-motion-detection', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.motion_detected) {
+                    document.getElementById('login-form').submit();
+                } else {
+                    alert('No motion detected. Please try again.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error checking for motion. Please try again.');
+            });
+        }
+
+        document.getElementById('login-button').addEventListener('click', function(event) {
+            event.preventDefault();
+            checkForMotion();
+        });
+    </script>
+
 </body>
 </html>
