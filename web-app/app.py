@@ -66,6 +66,7 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
 
+
 class User(UserMixin):
     """User class for Flask-Login integration."""
 
@@ -106,7 +107,8 @@ def dashboard():
         "dashboard.html", username=current_user.username, users_list=users_list
     )
 
-@app.route('/start-motion-detection', methods=['POST'])
+
+@app.route("/start-motion-detection", methods=["POST"])
 def start_motion_detection():
     """Starts motion detection and returns the detection result."""
     cap = cv2.VideoCapture(0)
