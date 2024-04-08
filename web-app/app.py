@@ -18,8 +18,11 @@ from flask_login import (
 )
 from flask_bcrypt import Bcrypt
 
+# Modifying the system path to ensure imports are found
 parent_dir = Path(__file__).resolve().parent.parent
 sys.path.append(str(parent_dir))
+
+# pylint: disable=wrong-import-position,import-error
 from machine_learning_client.app import detect_motion
 
 # Load environment variables
@@ -106,6 +109,7 @@ def dashboard():
 
 @app.route('/start-motion-detection', methods=['POST'])
 def start_motion_detection():
+    """Starts motion detection and returns the detection result."""
     cap = cv2.VideoCapture(0)
     try:
         motion_detected = detect_motion(cap, db)
@@ -116,6 +120,7 @@ def start_motion_detection():
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
+    """Authenticate users and redirect to the dashboard."""
     if request.method == "POST":
         username = request.form["username"]
         password = request.form["password"]
@@ -172,7 +177,6 @@ def delete_user(user_id):
         return redirect(url_for("dashboard"))
 
     users_collection.delete_one({"_id": ObjectId(user_id)})
-    # flash("User deleted successfully.", "info")
     return redirect(url_for("dashboard"))
 
 
