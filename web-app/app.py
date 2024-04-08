@@ -7,7 +7,7 @@ import cv2
 from dotenv import load_dotenv
 from bson.objectid import ObjectId
 from pymongo import MongoClient
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 from flask_login import (
     LoginManager,
     UserMixin,
@@ -36,7 +36,6 @@ mongo_uri = os.getenv("MONGO_URI")
 client = MongoClient(mongo_uri, tls=True, tlsAllowInvalidCertificates=True)
 db = client["SmartHomeSecurity"]
 users_collection = db.users
-video_capture = cv2.VideoCapture(0)
 
 
 def create_admin_user():
@@ -105,17 +104,19 @@ def dashboard():
         "dashboard.html", username=current_user.username, users_list=users_list
     )
 
+@app.route('/start-motion-detection', methods=['POST'])
+def start_motion_detection():
+    cap = cv2.VideoCapture(0)
+    try:
+        motion_detected = detect_motion(cap, db)
+    finally:
+        cap.release()
+    return jsonify({"motion_detected": motion_detected})
+
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    """Handle login functionality with motion detection."""
     if request.method == "POST":
-        # Trigger motion detection before processing credentials
-        motion_detected = detect_motion(video_capture, db)
-        if not motion_detected:
-            flash("No motion detected. Please try again.", "error")
-            return render_template("login.html")
-
         username = request.form["username"]
         password = request.form["password"]
         user = users_collection.find_one({"username": username})
@@ -126,10 +127,10 @@ def login():
             )
             login_user(user_obj)
             return redirect(url_for("dashboard"))
-        flash("Invalid username or password", "error")
+        else:
+            flash("Invalid username or password", "error")
 
     return render_template("login.html")
-
 
 
 @app.route("/logout")

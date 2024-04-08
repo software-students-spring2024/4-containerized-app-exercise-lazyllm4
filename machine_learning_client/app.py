@@ -20,43 +20,34 @@ def init_db():
 # Capture motion detection event
 def detect_motion(cap, db):
     events_collection = db[EVENTS_COLLECTION]
+    motion_detected = False
+    # Grab a few frames from the camera to allow it to adjust to brightness
+    for _ in range(5):
+        cap.read()
+    # Now read the first frame to compare against
     ret, frame1 = cap.read()
-    ret, frame2 = cap.read()
-
-    while cap.isOpened():
+    for _ in range(10):  # Check 10 frames for motion
+        ret, frame2 = cap.read()
+        if not ret:
+            break
+        # Calculate the absolute difference between frames
         diff = cv2.absdiff(frame1, frame2)
         gray = cv2.cvtColor(diff, cv2.COLOR_BGR2GRAY)
         blur = cv2.GaussianBlur(gray, (5, 5), 0)
         _, thresh = cv2.threshold(blur, 20, 255, cv2.THRESH_BINARY)
-        dilated = cv2.dilate(thresh, None, iterations=3)
-        contours, _ = cv2.findContours(dilated, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-
-        MOTION_DETECTED = False  # Changed to uppercase
-
+        dilated = cv2.dilate(thresh, None, iterations=2)
+        contours, _ = cv2.findContours(dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        # Iterate over all contours found and see if any are of significant size
         for contour in contours:
-            if cv2.contourArea(contour) < 900:
-                continue
-            MOTION_DETECTED = True  # Changed to uppercase
-            (x, y, w, h) = cv2.boundingRect(contour)
-            cv2.rectangle(frame1, (x, y), (x + w, y + h), (0, 255, 0), 2)
-            cv2.putText(
-                frame1,
-                f"Status: {'Movement'}",
-                (10, 20),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                1,
-                (0, 0, 255),
-                3,
-            )
-
-        if MOTION_DETECTED:  # Changed to uppercase
-            log_event(events_collection, "MOTION_DETECTED")
-
-        frame1 = frame2
-        ret, frame2 = cap.read()
-
-        if cv2.waitKey(40) == 27:
-            break
+            if cv2.contourArea(contour) > 500:
+                motion_detected = True
+                # Optionally log the event to the database
+                log_event(events_collection, 'MOTION_DETECTED')
+                break  # Exit if motion is detected
+        if motion_detected:
+            break  # If motion is detected, no need to process further frames
+        frame1 = frame2  # Update frame1 to the new latest frame
+    return motion_detected
 
 
 # Log events to MongoDB
