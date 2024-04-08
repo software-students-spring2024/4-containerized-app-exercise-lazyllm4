@@ -3,8 +3,7 @@
 import os
 import sys
 from pathlib import Path
-import cv2
-from cv2 import VideoCapture
+from cv2 import cv2
 from dotenv import load_dotenv
 from bson.objectid import ObjectId
 from pymongo import MongoClient
@@ -67,7 +66,6 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
 
-
 class User(UserMixin):
     """User class for Flask-Login integration."""
 
@@ -111,7 +109,7 @@ def dashboard():
 @app.route('/start-motion-detection', methods=['POST'])
 def start_motion_detection():
     """Starts motion detection and returns the detection result."""
-    cap = VideoCapture(0)
+    cap = cv2.VideoCapture(0)
     try:
         motion_detected = detect_motion(cap, db)
     finally:
