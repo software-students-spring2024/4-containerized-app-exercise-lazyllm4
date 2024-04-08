@@ -1,6 +1,7 @@
 """Main module for the Flask web application."""
 
 import os
+import cv2
 from dotenv import load_dotenv
 from bson.objectid import ObjectId
 from pymongo import MongoClient
@@ -98,10 +99,34 @@ def dashboard():
     )
 
 
+# @app.route("/login", methods=["GET", "POST"])
+# def login():
+#     """Handle login functionality."""
+#     if request.method == "POST":
+#         username = request.form["username"]
+#         password = request.form["password"]
+#         user = users_collection.find_one({"username": username})
+
+#         if user and User.validate_login(user["password"], password):
+#             user_obj = User(
+#                 str(user["_id"]), user["username"], user.get("is_admin", False)
+#             )
+#             login_user(user_obj)
+#             return redirect(url_for("dashboard"))
+#         flash("Invalid username or password", "error")
+
+#     return render_template("login.html")
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    """Handle login functionality."""
+    """Handle login functionality with motion detection."""
     if request.method == "POST":
+        # Trigger motion detection before processing credentials
+        motion_detected = simple_motion_detection()
+        if not motion_detected:
+            flash("No motion detected. Please try again.", "error")
+            return render_template("login.html")
+
         username = request.form["username"]
         password = request.form["password"]
         user = users_collection.find_one({"username": username})
@@ -115,6 +140,7 @@ def login():
         flash("Invalid username or password", "error")
 
     return render_template("login.html")
+
 
 
 @app.route("/logout")
@@ -159,6 +185,39 @@ def delete_user(user_id):
     # flash("User deleted successfully.", "info")
     return redirect(url_for("dashboard"))
 
+# mlc test
+def simple_motion_detection():
+    """
+    Simulates motion detection. Returns True if motion is detected.
+    Replace this with actual motion detection logic.
+    """
+    cap = cv2.VideoCapture(0)  # Assuming the first camera
+    # time.sleep(2)  # Allow 2 seconds for the camera to warm up
+    ret, frame1 = cap.read()
+    ret, frame2 = cap.read()
+    motion_detected = False
+
+    for _ in range(10):  # Simple simulation: check 10 frames for any difference
+        diff = cv2.absdiff(frame1, frame2)
+        gray = cv2.cvtColor(diff, cv2.COLOR_BGR2GRAY)
+        blur = cv2.GaussianBlur(gray, (5, 5), 0)
+        _, thresh = cv2.threshold(blur, 20, 255, cv2.THRESH_BINARY)
+        contours, _ = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+        for contour in contours:
+            if cv2.contourArea(contour) < 500:
+                continue
+            motion_detected = True
+            break  # Exit if any motion is detected
+
+        if motion_detected:
+            break
+
+        frame1 = frame2
+        ret, frame2 = cap.read()
+
+    cap.release()
+    return motion_detected
 
 if __name__ == "__main__":
     app.run(debug=True)
