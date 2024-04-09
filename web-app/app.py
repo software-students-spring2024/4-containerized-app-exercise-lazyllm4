@@ -3,7 +3,7 @@
 import os
 import sys
 from pathlib import Path
-import cv2
+from cv2 import cv2
 from dotenv import load_dotenv
 from bson.objectid import ObjectId
 from pymongo import MongoClient
@@ -18,8 +18,11 @@ from flask_login import (
 )
 from flask_bcrypt import Bcrypt
 
+# Modifying the system path to ensure imports are found
 parent_dir = Path(__file__).resolve().parent.parent
 sys.path.append(str(parent_dir))
+
+# pylint: disable=wrong-import-position,import-error
 from machine_learning_client.app import detect_motion
 
 # Load environment variables
@@ -104,8 +107,10 @@ def dashboard():
         "dashboard.html", username=current_user.username, users_list=users_list
     )
 
-@app.route('/start-motion-detection', methods=['POST'])
+
+@app.route("/start-motion-detection", methods=["POST"])
 def start_motion_detection():
+    """Starts motion detection and returns the detection result."""
     cap = cv2.VideoCapture(0)
     try:
         motion_detected = detect_motion(cap, db)
@@ -116,6 +121,7 @@ def start_motion_detection():
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
+    """Authenticate users and redirect to the dashboard."""
     if request.method == "POST":
         username = request.form["username"]
         password = request.form["password"]
@@ -127,8 +133,8 @@ def login():
             )
             login_user(user_obj)
             return redirect(url_for("dashboard"))
-        else:
-            flash("Invalid username or password", "error")
+
+        flash("Invalid username or password", "error")
 
     return render_template("login.html")
 
@@ -172,7 +178,6 @@ def delete_user(user_id):
         return redirect(url_for("dashboard"))
 
     users_collection.delete_one({"_id": ObjectId(user_id)})
-    # flash("User deleted successfully.", "info")
     return redirect(url_for("dashboard"))
 
 
