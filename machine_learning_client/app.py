@@ -4,6 +4,7 @@ import os
 import datetime
 import cv2
 from pymongo import MongoClient
+import socket
 
 MONGO_URI = os.getenv("MONGO_URI")
 DATABASE_NAME = "SmartHomeSecurity"
@@ -16,11 +17,17 @@ def init_db():
     client = MongoClient(MONGO_URI, tls=True, tlsAllowInvalidCertificates=True)
     return client[DATABASE_NAME]
 
+# Assume that sensor_details is a dictionary with sensor info
+sensor_details = {
+    "camera_index": CAMERA_INDEX,
+    "camera_location": "Laptop",
+}
 
 # Capture motion detection event
 def detect_motion(cap, db):
     events_collection = db[EVENTS_COLLECTION]
     motion_detected = False
+    analysis_results = {}
     # Grab a few frames from the camera to allow it to adjust to brightness
     for _ in range(5):
         cap.read()
@@ -41,18 +48,28 @@ def detect_motion(cap, db):
         for contour in contours:
             if cv2.contourArea(contour) > 500:
                 motion_detected = True
+                analysis_results = {
+                    "contour_area": cv2.contourArea(contour),
+                    "contour_location": cv2.boundingRect(contour),
+                }
                 # Optionally log the event to the database
-                log_event(events_collection, 'MOTION_DETECTED')
+                log_event(events_collection, 'MOTION_DETECTED', analysis_results, sensor_details)
                 break  # Exit if motion is detected
         if motion_detected:
             break  # If motion is detected, no need to process further frames
         frame1 = frame2  # Update frame1 to the new latest frame
-    return motion_detected
+    return motion_detected, analysis_results
 
 
 # Log events to MongoDB
-def log_event(collection, event_type):
-    event = {"type": event_type, "timestamp": datetime.datetime.utcnow()}
+def log_event(collection, event_type, analysis_results, sensor_details):
+    event = {
+        "type": event_type,
+        "timestamp": datetime.datetime.utcnow(),
+        "machine_name": socket.gethostname(),
+        "analysis_results": analysis_results,
+        "sensor_details": sensor_details,
+    }
     collection.insert_one(event)
 
 
