@@ -1,9 +1,11 @@
 """Main module for the Flask web application."""
 
+# pylint: disable=import-error
 import os
 import sys
 from pathlib import Path
-from cv2 import cv2
+import cv2
+# pylint: disable=import-error
 from dotenv import load_dotenv
 from bson.objectid import ObjectId
 from pymongo import MongoClient
@@ -113,10 +115,10 @@ def start_motion_detection():
     """Starts motion detection and returns the detection result."""
     cap = cv2.VideoCapture(0)
     try:
-        motion_detected = detect_motion(cap, db)
+        motion_detected, analysis_results = detect_motion(cap, db)
     finally:
         cap.release()
-    return jsonify({"motion_detected": motion_detected})
+    return jsonify({"motion_detected": motion_detected, "analysis_results": analysis_results})
 
 
 @app.route("/login", methods=["GET", "POST"])
