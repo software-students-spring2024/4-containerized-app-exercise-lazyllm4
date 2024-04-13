@@ -28,6 +28,7 @@ face-recognition = "*"
 deepface = "*"
 tf-keras = "*"
 boto3 = "*"
+pytest = "*"
 
 [dev-packages]
 black = "*"

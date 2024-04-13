@@ -49,7 +49,7 @@ bcrypt = Bcrypt(app)
 
 # MongoDB Atlas setup
 mongo_uri = os.getenv("MONGO_URI")
-client = MongoClient(mongo_uri, tls=True, tlsAllowInvalidCertificates=True)
+client = MongoClient(mongo_uri)
 db = client["SmartHomeSecurity"]
 users_collection = db["users"]
 
