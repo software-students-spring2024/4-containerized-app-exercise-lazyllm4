@@ -19,3 +19,4 @@ tomli==2.0.1
 tomlkit==0.12.4
 typing_extensions==4.11.0
 pymongo==4.6.2
+python-dotenv==1.0.1
