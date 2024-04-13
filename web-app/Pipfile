@@ -24,6 +24,10 @@ six = "==1.16.0"
 werkzeug = "==3.0.1"
 zipp = "==3.17.0"
 opencv-python-headless = "*"
+face-recognition = "*"
+deepface = "*"
+tf-keras = "*"
+boto3 = "*"
 pytest = "*"
 
 [dev-packages]

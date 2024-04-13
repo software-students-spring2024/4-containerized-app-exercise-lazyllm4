@@ -25,6 +25,11 @@ tomli = "==2.0.1"
 tomlkit = "==0.12.4"
 typing-extensions = "==4.11.0"
 python-dotenv = "*"
+opencv-python-headless = "*"
+pymongo = "*"
+face-recognition = "*"
+deepface = "*"
+boto3 = "*"
 
 [dev-packages]
 
