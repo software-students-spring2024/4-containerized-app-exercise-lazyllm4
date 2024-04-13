@@ -1,17 +1,107 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Register - Smart Home Security</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <title>Register User or Admin</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+        form {
+            margin-top: 20px;
+        }
+        #canvas {
+            display: none; /* Keep canvas hidden as it is only used for drawing the image for capture */
+        }
+        .input-group {
+            margin-bottom: 10px;
+        }
+        #capturedPhoto {
+            margin-top: 10px;
+        }
+    </style>
 </head>
 <body>
-    <h1>Register</h1>
-    <form action="/register" method="post">
-        <label for="username">Username:</label>
-        <input type="text" id="username" name="username" required>
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required>
-        <button type="submit">Register</button>
+    <h2>Register User or Admin</h2>
+    <form id="registrationForm" method="POST" enctype="multipart/form-data">
+        <label for="role">Select Role:</label>
+        <select id="role" name="role" onchange="togglePhotoCapture(this.value)">
+            <option value="user">User</option>
+            <option value="admin">Admin</option>
+        </select>
+
+        <div id="photoSection">
+            <video id="video" width="320" height="240" autoplay></video>
+            <button type="button" id="capture">Capture Photo</button>
+            <canvas id="canvas"></canvas>
+            <img id="capturedPhoto" src="" alt="Captured photo" width="320" height="240" style="display:none;"/>
+        </div>
+
+        <div class="input-group">
+            <label for="username">Username:</label>
+            <input type="text" name="username" id="username" placeholder="Username" required>
+        </div>
+        <div class="input-group">
+            <label for="password">Password:</label>
+            <input type="password" name="password" id="password" placeholder="Password" required>
+        </div>
+        <input type="hidden" name="photo" id="photo">
+        <button type="submit" id="submitBtn">Register</button>
     </form>
+
+    <script>
+        const roleElement = document.getElementById('role');
+        const photoSection = document.getElementById('photoSection');
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const photoInput = document.getElementById('photo');
+        const captureButton = document.getElementById('capture');
+        const registrationForm = document.getElementById('registrationForm');
+        const capturedPhoto = document.getElementById('capturedPhoto');
+        let photoCaptured = false;
+
+        function togglePhotoCapture(value) {
+            if (value === 'admin') {
+                photoSection.style.display = 'none';
+                photoCaptured = true; // Assume no photo required for admin
+            } else {
+                photoSection.style.display = 'block';
+                photoCaptured = false; // Ensure photo must be captured for users
+            }
+        }
+
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(function(stream) {
+                video.srcObject = stream;
+            })
+            .catch(function(err) {
+                console.log("An error occurred: " + err);
+            });
+
+        captureButton.addEventListener('click', function() {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+            let image_data_url = canvas.toDataURL('image/jpeg');
+            photoInput.value = image_data_url;
+            capturedPhoto.src = image_data_url;
+            capturedPhoto.style.display = 'block';
+            video.style.display = 'none';
+            captureButton.style.display = 'none';
+            photoCaptured = true;
+        });
+
+        registrationForm.addEventListener('submit', function(event) {
+            if (!photoCaptured && roleElement.value === 'user') {
+                event.preventDefault();
+                alert('Please capture a photo before submitting.');
+            } else {
+                alert('Registration successful!');
+            }
+        });
+    </script>
 </body>
 </html>

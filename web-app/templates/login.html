@@ -1,55 +1,151 @@
 <!DOCTYPE html>
 <html>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
 <head>
     <title>Login - Smart Home Security</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            width: 300px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            border-radius: 5px;
+        }
+        h1 {
+            font-size: 24px;
+            text-align: center;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        input[type="text"], input[type="password"], button {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        label {
+            margin-top: 10px;
+        }
+        #adminCheck {
+            margin: 10px 0;
+        }
+        /* Adjustments to ensure video and canvas styling are consistent */
+        video, canvas, img {
+            width: 320px;
+            height: 240px;
+            margin-bottom: 10px;
+        }
+        canvas, img {
+            display: none; /* Initially hide canvas and capturedPhoto */
+        }
+    </style>
 </head>
 <body>
-    <h1>Login</h1>
+    <div class="container">
+        <h1>Login</h1>
+        <video id="video" autoplay></video>
+        <button type="button" id="capture">Capture Photo</button>
+        <canvas id="canvas"></canvas>
+        <img id="capturedPhoto" src="" alt="Captured photo" style="display:none;"/>
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <div class="{{ category }}">{{ message }}</div>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
-
-    <form action="/login" method="post" id="login-form">
-        <label for="username">Username:</label>
-        <input type="text" id="username" name="username" required>
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required>
-        <button type="submit" id="login-button">Login</button>
-    </form>
+        <form id="login-form" method="post">
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" required>
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+            <input type="checkbox" id="adminCheck" name="admin">
+            <label for="admin">Login as Admin</label>
+            <input type="hidden" name="photo" id="photo">
+            <button type="submit">Login</button>
+        </form>
+    </div>
 
     <script>
-        function checkForMotion() {
-            fetch('/start-motion-detection', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.motion_detected) {
-                    document.getElementById('login-form').submit();
-                } else {
-                    alert('No motion detected. Please try again.');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Error checking for motion. Please try again.');
-            });
-        }
-
-        document.getElementById('login-button').addEventListener('click', function(event) {
-            event.preventDefault();
-            checkForMotion();
+        document.getElementById('adminCheck').addEventListener('change', function() {
+            const video = document.getElementById('video');
+            const captureButton = document.getElementById('capture');
+            if (this.checked) {
+                video.style.display = 'none';
+                captureButton.style.display = 'none';
+            } else {
+                video.style.display = 'block';
+                captureButton.style.display = 'block';
+            }
         });
-    </script>
 
+        document.getElementById('capture').addEventListener('click', function() {
+            const video = document.getElementById('video');
+            const canvas = document.getElementById('canvas');
+            const photoInput = document.getElementById('photo');
+            const capturedPhoto = document.getElementById('capturedPhoto');
+
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+            let image_data_url = canvas.toDataURL('image/jpeg');
+            photoInput.value = image_data_url;
+            capturedPhoto.src = image_data_url;
+            capturedPhoto.style.display = 'block'; // Show the captured photo
+            video.style.display = 'none'; // Optionally hide the video feed after capturing the photo
+        });
+
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(function(stream) {
+                document.getElementById('video').srcObject = stream;
+            })
+            .catch(function(err) {
+                console.log("An error occurred: " + err);
+                alert('Cannot access your camera. Please ensure it is connected and you have given permission.');
+            });
+    </script>
 </body>
+
+
+<!-- Modal for displaying messages -->
+<div class="modal fade" id="messageModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalLabel">Alert</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p id="modalMessage"></p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <script>
+    $(document).ready(function() {
+        var message = "{{ message }}";
+        if (message) {
+            $('#modalMessage').text(message);
+            $('#messageModal').modal('show');
+        }
+    });
+    </script>
+    
 </html>
