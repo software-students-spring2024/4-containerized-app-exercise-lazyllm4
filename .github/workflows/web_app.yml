@@ -1,4 +1,4 @@
-name: web_app CI / CD
+name: machine_learning_client CI / CD
 on: [push, pull_request]
 jobs:
   build:
@@ -15,7 +15,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
         run: |
-          cd web_app
+          cd machine_learning_client
           python -m pip install --upgrade pip
           pip install --user pipenv
           pipenv --python ${{ matrix.python-version }}
@@ -23,5 +23,5 @@ jobs:
           pipenv install
       - name: Run tests
         run: |
-          cd web_app
+          cd machine_learning_client
           pipenv run pytest
