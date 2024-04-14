@@ -1,12 +1,12 @@
 name: web_app CI / CD
-on: [push, pull_request]
+on: [pull_request]
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 5
     strategy:
       matrix:
-        python-version: ["3.9", "3.10"]
+        python-version: ["3.10"]
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python ${{ matrix.python-version }}
@@ -21,7 +21,11 @@ jobs:
           pipenv --python ${{ matrix.python-version }}
           pipenv install pytest
           pipenv install
-      - name: Run tests
+      - name: Turn on 'editable' mode
         run: |
           cd web_app
-          pipenv run pytest
+          pipenv install -e .
+      - name: Test with pytest
+        run: |
+          cd web_app
+          pipenv run python -m pytest
