@@ -1,31 +1,38 @@
-name: machine_learning_client CI / CD
-on: [pull_request]
+name: Python application workflow
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
-    strategy:
-      matrix:
-        python-version: ["3.9", "3.10"]
+
     steps:
-      - uses: actions/checkout@v3
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: Install dependencies
-        run: |
-          cd machine_learning_client
-          python -m pip install --upgrade pip
-          pip install --user pipenv
-          pipenv --python ${{ matrix.python-version }}
-          pipenv install pytest
-          pipenv install
-      - name: Turn on 'editable' mode
-        run: |
-          cd machine_learning_client
-          pipenv install -e .
-      - name: Test with pytest
-        run: |
-          cd machine_learning_client
-          pipenv run python -m pytest
+    - uses: actions/checkout@v2
+      name: Check out repository code
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.8'  # Specify the Python version.
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Run tests
+      run: |
+        python -m unittest discover -s test  # Assuming tests are in a directory named 'test'
+
+    # Optional: Add a linting step
+    - name: Lint with flake8
+      run: |
+        pip install flake8
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
