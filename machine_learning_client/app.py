@@ -2,13 +2,19 @@
 
 import os
 import datetime
+from time import sleep
 import cv2
 from pymongo import MongoClient
 import socket
-from deepface import DeepFace
+from dotenv import load_dotenv
+# from deepface import DeepFace
 
+# MONGO_URI = os.getenv("MONGO_URI")
+# Load environmental variables from .env file
+load_dotenv()
+# Now you can access the environmental variables using os.getenv()
 MONGO_URI = os.getenv("MONGO_URI")
-DATABASE_NAME = "Motion Detector"
+DATABASE_NAME = "Motion-Detector"
 EVENTS_COLLECTION = "events"
 USERS_COLLECTION = "users" 
 CAMERA_INDEX = 0
@@ -16,7 +22,8 @@ CAMERA_INDEX = 0
 
 # Setup MongoDB connection
 def init_db():
-    client = MongoClient(MONGO_URI)
+    print(MONGO_URI)
+    client = MongoClient(MONGO_URI, tls=True, tlsAllowInvalidCertificates=True)
     return client[DATABASE_NAME]
 
 # Assume that sensor_details is a dictionary with sensor info
@@ -106,14 +113,15 @@ def detect_motion(cap, db):
                 log_event(events_collection, 'MOTION_DETECTED', analysis_results, sensor_details)
                 _, detected_frame = cap.read()
                 cv2.imwrite('detected_frame.jpg', detected_frame)
-                recognition_results = perform_facial_recognition('detected_frame.jpg', db[USERS_COLLECTION])
+                recognition_results = True
+                # recognition_results = perform_facial_recognition('detected_frame.jpg', db[USERS_COLLECTION])
                 log_event(events_collection, 'MOTION_DETECTED', analysis_results, sensor_details, recognition_results)
                 return True, analysis_results, recognition_results
 
         frame1 = frame2  # Update the reference frame
 
     if not motion_detected:
-        log_event(events_collection, 'NO_MOTION_DETECTED', {}, sensor_details, "No significant motion detected")
+        log_event(events_collection, 'NO_MOTION_DETECTED', {}, sensor_details, False)
         return False, {"message": "No significant motion detected"}, None
 
     return False, {"error": "Uncertain if motion occurred"}, None
@@ -153,25 +161,22 @@ def perform_facial_recognition(captured_image_path, users_collection):
                 result = DeepFace.verify(captured_image_path, user_photo_path, enforce_detection=False)
                 if result["verified"]:
                     # If a user is recognized, return the result
-                    return {
-                        "user_id": str(user["_id"]),
-                        "username": user["username"],
-                        "verified": result["verified"]
-                    }
+                    return True
             except Exception as e:
                 print(f"Error during facial recognition for {user['username']}: {e}")
-    return None
+    return False
 
 # Log events to MongoDB
-def log_event(collection, event_type, analysis_results, sensor_details, recognition_results=None):
+def log_event(collection, event_type, analysis_results, sensor_details, recognition_results=False):
     event = {
         "type": event_type,
         "timestamp": datetime.datetime.utcnow(),
         "machine_name": socket.gethostname(),
         "analysis_results": analysis_results,
         "sensor_details": sensor_details,
-        "recognition_results": recognition_results or "No recognition results",
+        "recognition_results": recognition_results,
     }
+    print(event)
     collection.insert_one(event)
 
 
@@ -179,8 +184,12 @@ def log_event(collection, event_type, analysis_results, sensor_details, recognit
 if __name__ == "__main__":
     db = init_db()
     cap = cv2.VideoCapture(CAMERA_INDEX)
-    try:
-        detect_motion(cap, db)
-    finally:
-        cap.release()
-        cv2.destroyAllWindows()
+    # find and load camera
+    while True:
+        try:
+            detect_motion(cap, db)
+            sleep(1)
+        except KeyboardInterrupt:
+            cap.release()
+            cv2.destroyAllWindows()
+            exit(0)

@@ -27,7 +27,7 @@ from flask_login import (
 from flask_bcrypt import Bcrypt
 import boto3
 from deepface import DeepFace
-
+from dotenv import load_dotenv
 # Modifying the system path to ensure imports are found
 parent_dir = Path(__file__).resolve().parent.parent
 sys.path.append(str(parent_dir))
@@ -49,7 +49,7 @@ bcrypt = Bcrypt(app)
 
 # MongoDB Atlas setup
 mongo_uri = os.getenv("MONGO_URI")
-client = MongoClient(mongo_uri)
+client = MongoClient(mongo_uri, tls=True, tlsAllowInvalidCertificates=True)
 db = client["SmartHomeSecurity"]
 users_collection = db["users"]
 
@@ -141,6 +141,9 @@ def dashboard():
 @app.route("/start-motion-detection", methods=["POST"])
 def start_motion_detection():
     """Starts motion detection and returns the detection result."""
+
+
+
     cap = cv2.VideoCapture(0)
     try:
         motion_detected, analysis_results, _ = detect_motion(cap, db)
@@ -169,17 +172,19 @@ def login():
             #flash("Password is incorrect.", "error")
             return redirect(url_for("login"), message = "Password is incorrect.")
         
-        # Perform motion detection
-        motion_response = start_motion_detection()
-        motion_data = motion_response.get_json()
+        # # Perform motion detection
+        # motion_response = start_motion_detection()
+        # motion_data = motion_response.get_json()
 
-        # Check motion detection result
-        if not motion_data["motion_detected"]:
-            flash("No motion detected. Please ensure your presence in front of the camera.", "error")
-            return redirect(url_for("login"))
-        else : 
-            print("Motion detecteddd")
-            flash("Motion Detected")
+        # # Check motion detection result
+        # if not motion_data["motion_detected"]:
+        #     flash("No motion detected. Please ensure your presence in front of the camera.", "error")
+        #     return redirect(url_for("login"))
+        # else : 
+        #     print("Motion detecteddd")
+        #     flash("Motion Detected")
+
+         
     
 
 
