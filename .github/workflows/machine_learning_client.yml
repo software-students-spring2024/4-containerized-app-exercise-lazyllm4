@@ -1,5 +1,7 @@
 name: machine_learning_client CI / CD
-on: [pull_request]
+on:   
+  pull_request:
+    branches: [ main ]
 jobs:
   build:
     runs-on: ubuntu-latest

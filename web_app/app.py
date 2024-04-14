@@ -40,17 +40,17 @@ IMAGE_STORAGE_PATH = os.path.join(BASE_DIR, 'user_images')
 
 
 # Load environment variables
-load_dotenv()
+
 
 app = Flask(__name__)
-app.secret_key = os.getenv("SECRET_KEY", "default_secret_key")
+
 
 # Setup Flask-Bcrypt
 bcrypt = Bcrypt(app)
 
 # MongoDB Atlas setup
-mongo_uri = os.getenv("MONGO_URI")
-client = MongoClient(mongo_uri, tls=True, tlsAllowInvalidCertificates=True)
+client = MongoClient(os.getenv("MONGO_URI", "mongodb://mongodb:27017/"))
+db = client.test
 db = client["SmartHomeSecurity"]
 db2 = client["Motion-Detector"]
 users_collection = db["users"]
