@@ -1,35 +1,60 @@
-""" Module for testing app.py in the machine_learning_client folder. """
-
-import pytest
+import unittest
 from unittest.mock import patch, MagicMock
-from machine_learning_client.app import init_db, detect_motion, perform_facial_recognition
+import sys
+import os
+import cv2
+import numpy as np
+from pymongo import MongoClient
+from deepface import DeepFace
+from dotenv import load_dotenv
+# Adjust the Python path to find the app module
+current_directory = os.path.dirname(__file__)
+parent_directory = os.path.dirname(current_directory) 
+sys.path.insert(0, parent_directory)  # Adds it to sys.path
+from app import init_db, detect_motion, perform_facial_recognition, log_event
 
-class Tests:
-    """ Class for testing the functionalities in app.py """
+load_dotenv()
+# Now you can access the environmental variables using os.getenv()
+MONGO_URI = os.getenv("MONGO_URI")
+DATABASE_NAME = "Motion-Detector"
+EVENTS_COLLECTION = "events"
+USERS_COLLECTION = "users" 
+CAMERA_INDEX = 0
+class Test(unittest.TestCase):
+    def setUp(self):
+        # Setup for each test
+        self.db_patch = patch('pymongo.MongoClient')
+        self.cv2_patch = patch('cv2.VideoCapture')
+        self.deepface_patch = patch('deepface.DeepFace.verify')
 
-    def test_sanity_check(self):
-        """ Sanity check to ensure testing framework functions correctly. """
-        assert True  # Basic test to check the setup
+        # Start patches
+        self.mock_db = self.db_patch.start()
+        self.mock_cv2 = self.cv2_patch.start()
+        self.mock_deepface = self.deepface_patch.start()
 
-    @patch('machine_learning_client.app.MongoClient')
-    def test_init_db(self, mock_mongo_client):
-        """ Test the initialization of the database connection. """
-        mock_mongo_client.return_value.__getitem__.return_value = MagicMock()
-        db = init_db()
-        assert db is not None, "Database initialization failed."
+        # Mock behaviors
+        self.mock_db.return_value.__getitem__.return_value = MagicMock()
+        self.mock_cv2.return_value.isOpened.return_value = True
+        self.mock_cv2.return_value.read.return_value = (True, np.zeros((480, 640, 3), dtype=np.uint8))  # A dummy black image
+        self.mock_deepface.return_value = {'verified': True}
 
-    @patch('machine_learning_client.app.cv2.VideoCapture')
-    def test_detect_motion(self, mock_video_capture):
-        """ Test motion detection functionality. """
-        mock_video_capture.return_value.read.return_value = (True, MagicMock())
-        motion_detected = detect_motion(mock_video_capture.return_value)
-        assert motion_detected is not None, "Motion detection failed."
-
-    @patch('machine_learning_client.app.DeepFace.verify')
-    def test_perform_facial_recognition(self, mock_deepface):
-        """ Test facial recognition functionality. """
-        mock_deepface.return_value = {'verified': True}
-        recognition_result = perform_facial_recognition('image_path', 'user_collection')
-        assert recognition_result == True, "Facial recognition failed or not verified."
+    def tearDown(self):
+        # Stop all patches
+        patch.stopall()
 
 
+    def test_detect_motion(self):
+        # Mock setup
+        db = MagicMock()
+        cap = cv2.VideoCapture(0)
+        detect_motion(cap, db)
+        db[EVENTS_COLLECTION].insert_one.assert_called()
+
+    def test_log_event(self):
+        # Test event logging to MongoDB
+        collection = MagicMock()
+        log_event(collection, 'motion_detected', {}, {})
+        collection.insert_one.assert_called()
+
+if __name__ == '__main__':
+    unittest.main()
