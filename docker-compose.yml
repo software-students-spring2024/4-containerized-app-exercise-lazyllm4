@@ -1,0 +1,13 @@
+version: '3.8'
+services:
+  web-app:
+    build: ./path_to_web_app
+    ports:
+      - "5000:5000"
+    depends_on:
+      - backend
+
+  backend:
+    build: ./path_to_backend
+    ports:
+      - "8000:8000"

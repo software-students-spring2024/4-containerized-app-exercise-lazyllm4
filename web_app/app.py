@@ -28,6 +28,7 @@ from flask_bcrypt import Bcrypt
 import boto3
 from deepface import DeepFace
 from dotenv import load_dotenv
+import time
 # Modifying the system path to ensure imports are found
 parent_dir = Path(__file__).resolve().parent.parent
 sys.path.append(str(parent_dir))
@@ -51,6 +52,7 @@ bcrypt = Bcrypt(app)
 mongo_uri = os.getenv("MONGO_URI")
 client = MongoClient(mongo_uri, tls=True, tlsAllowInvalidCertificates=True)
 db = client["SmartHomeSecurity"]
+db2 = client["Motion-Detector"]
 users_collection = db["users"]
 
 # AWS S3 setup
@@ -151,7 +153,16 @@ def start_motion_detection():
         cap.release()
     return jsonify({"motion_detected": motion_detected, "analysis_results": analysis_results})
 
+def detection_r():
+    events_collection = db2.events
+    while True:
+        # Fetch recent documents
+        documents = events_collection.find({}, {'recognition_results': 1})
 
+        # Check if any document has recognition_results as True
+        for document in documents:
+            if 'recognition_results' in document and document['recognition_results'] is True:
+                return True
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -171,7 +182,14 @@ def login():
         if not bcrypt.check_password_hash(user.get("password", ""), password):
             #flash("Password is incorrect.", "error")
             return redirect(url_for("login"), message = "Password is incorrect.")
-        
+        cap = cv2.VideoCapture(0)
+        detect_motion(cap,db)
+        if detection_r():
+            print("Motion detecteddd")
+            flash("Motion Detected")
+        else:
+            flash("No motion detected. Please ensure your presence in front of the camera.", "error")
+            return redirect(url_for("login"))
         # # Perform motion detection
         # motion_response = start_motion_detection()
         # motion_data = motion_response.get_json()
