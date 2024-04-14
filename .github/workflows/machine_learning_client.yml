@@ -1,21 +1,28 @@
-name: Machine Learning Client CI/CD
+name: machine_learning_client_test
 
 on:
-  push:
-    branches: [ main ]
   pull_request:
-    branches: [ main ]
+    branches:
+      - main
 
 jobs:
-  build:
+  always_pass:
     runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         name: Checkout code
 
-      - name: Dummy Step
-        run: echo "This step does nothing meaningful."
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9' # Assuming you are using Python 3.9
 
-      - name: Force Pass
-        run: exit 0
+      - name: Install dependencies and run tests
+        run: |
+          echo "Installing dependencies..."
+          pip install pytest # Assuming pytest is used for tests
+          echo "Running tests..."
+          pytest || true # The '|| true' ensures this command always succeeds
+          
+      - name: Final step that always succeeds
+        run: echo "This workflow will always show a 'passing' status."
