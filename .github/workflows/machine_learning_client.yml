@@ -6,7 +6,7 @@ jobs:
     timeout-minutes: 15
     strategy:
       matrix:
-        python-version: ["3.9", "3.10"]
+        python-version: ["3.10"]
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python ${{ matrix.python-version }}
@@ -19,9 +19,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install --user pipenv
           pipenv --python ${{ matrix.python-version }}
-          pipenv install pytest
-          pipenv install
+          pipenv install --dev  # Install all dependencies and dev dependencies from Pipfile
       - name: Run tests
         run: |
-          cd machine_learning_client
-          pipenv run pytest
+          pipenv run pytest  # Run tests with pytest

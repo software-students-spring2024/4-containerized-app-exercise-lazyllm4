@@ -8,6 +8,8 @@
 From the root dir
 enter following command
 `docker compose up --build`
+
+
 # Containerized App Exercise
 
 Build a containerized app that uses machine learning. See [instructions](./instructions.md) for details.
