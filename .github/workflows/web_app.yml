@@ -20,6 +20,7 @@ jobs:
           pip install --user pipenv
           pipenv --python ${{ matrix.python-version }}
           pipenv install --dev  # Install all dependencies and dev dependencies from Pipfile
+          pipenv install pytest  # Explicitly install pytest
       - name: Run tests
         run: |
           pipenv run pytest  # Run tests with pytest
