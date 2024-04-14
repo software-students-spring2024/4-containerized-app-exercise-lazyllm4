@@ -22,7 +22,6 @@ CAMERA_INDEX = 0
 
 # Setup MongoDB connection
 def init_db():
-    print(MONGO_URI)
     client = MongoClient(MONGO_URI, tls=True, tlsAllowInvalidCertificates=True)
     return client[DATABASE_NAME]
 
