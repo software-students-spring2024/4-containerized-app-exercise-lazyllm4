@@ -155,14 +155,17 @@ def start_motion_detection():
 
 def detection_r():
     events_collection = db2.events
-    while True:
-        # Fetch recent documents
-        documents = events_collection.find({}, {'recognition_results': 1})
-
-        # Check if any document has recognition_results as True
-        for document in documents:
-            if 'recognition_results' in document and document['recognition_results'] is True:
-                return True
+    
+    # Fetch recent documents
+    documents = events_collection.find({"type": "MOTION_DETECTED"}).sort("timestamp", -1).limit(5)
+    # Check if any document has recognition_results as True
+    current_time = datetime.datetime.now()
+    for document in documents:
+        document_time = document['timestamp']
+        time_difference = current_time - document_time
+        if time_difference.total_seconds() < 10:
+            return True
+    return False
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -185,7 +188,7 @@ def login():
         cap = cv2.VideoCapture(0)
         detect_motion(cap,db)
         if detection_r():
-            print("Motion detecteddd")
+            print("Motion detected")
             flash("Motion Detected")
         else:
             flash("No motion detected. Please ensure your presence in front of the camera.", "error")
