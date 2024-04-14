@@ -1,9 +1,9 @@
 name: web_app CI / CD
-on: [push, pull_request]
+on: [pull_request]
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 5
     strategy:
       matrix:
         python-version: ["3.10"]
@@ -19,8 +19,13 @@ jobs:
           python -m pip install --upgrade pip
           pip install --user pipenv
           pipenv --python ${{ matrix.python-version }}
-          pipenv install --dev  # Install all dependencies and dev dependencies from Pipfile
-          pipenv install pytest  # Explicitly install pytest
-      - name: Run tests
+          pipenv install pytest
+          pipenv install
+      - name: Turn on 'editable' mode
         run: |
-          pipenv run pytest  # Run tests with pytest
+          cd web_app
+          pipenv install -e .
+      - name: Test with pytest
+        run: |
+          cd web_app
+          pipenv run python -m pytest

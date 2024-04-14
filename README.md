@@ -9,10 +9,35 @@ From the root dir
 enter following command
 `docker compose up --build`
 
+# Run Docker container:
 
-# Containerized App Exercise
+1. In one terminal
 
-Build a containerized app that uses machine learning. See [instructions](./instructions.md) for details.
+`docker network create project4`
+
+`cd machine_learning_client`
+
+`docker build -t web_app_image .`
+
+
+
+2. start a new terminal
+
+`cd web_app`
+
+`docker build -t ml_client_image .`
+
+3. start the last terminal
+
+`docker run --name mongodb -d -p 27017:27017 --network project4 mongo`
+# Smart Home Security App
+    Our Smart Home Security App combines user-friendly access controls with advanced security features to enhance home safety. Users can log in using a username and password, while an integrated facial recognition system verifies identities against a database of known faces for additional security. The app also includes a sophisticated motion detection system that identifies and records any activity, alerting homeowners to potential intruders. Designed for ease of use, it seamlessly integrates with a wide range of cameras and home automation systems, making it an ideal solution for enhancing residential security through technology.
+
+ - **Web App:** Get if not detected motion from database and display website and login page
+- **Machine Learning Client:** Python program that do facial recognition and motion detector
+- **Database:** A MongoDB database stores if not detected motion, userid, password, photo
+
+
 
 
 ## Contributors
