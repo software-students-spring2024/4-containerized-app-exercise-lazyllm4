@@ -30,6 +30,8 @@ pymongo = "*"
 face-recognition = "*"
 deepface = "*"
 boto3 = "*"
+tensorflow = "*"
+tf-keras = "*"
 
 [dev-packages]
 pytest = "*"
