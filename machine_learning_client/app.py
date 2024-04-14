@@ -7,7 +7,7 @@ import cv2
 from pymongo import MongoClient
 import socket
 from dotenv import load_dotenv
-# from deepface import DeepFace
+from deepface import DeepFace
 
 # MONGO_URI = os.getenv("MONGO_URI")
 # Load environmental variables from .env file
