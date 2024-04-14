@@ -37,7 +37,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 IMAGE_STORAGE_PATH = os.path.join(BASE_DIR, 'user_images')
 
 # pylint: disable=wrong-import-position,import-error
-from machine_learning_client.app import detect_motion
+
 
 # Load environment variables
 load_dotenv()
@@ -140,18 +140,18 @@ def dashboard():
 
 
 
-@app.route("/start-motion-detection", methods=["POST"])
-def start_motion_detection():
-    """Starts motion detection and returns the detection result."""
+# @app.route("/start-motion-detection", methods=["POST"])
+# def start_motion_detection():
+#     """Starts motion detection and returns the detection result."""
 
 
 
-    cap = cv2.VideoCapture(0)
-    try:
-        motion_detected, analysis_results, _ = detect_motion(cap, db)
-    finally:
-        cap.release()
-    return jsonify({"motion_detected": motion_detected, "analysis_results": analysis_results})
+#     cap = cv2.VideoCapture(0)
+#     try:
+#         motion_detected, analysis_results, _ = detect_motion(cap, db)
+#     finally:
+#         cap.release()
+#     return jsonify({"motion_detected": motion_detected, "analysis_results": analysis_results})
 
 def detection_r():
     events_collection = db2.events
@@ -185,8 +185,7 @@ def login():
         if not bcrypt.check_password_hash(user.get("password", ""), password):
             #flash("Password is incorrect.", "error")
             return redirect(url_for("login"), message = "Password is incorrect.")
-        cap = cv2.VideoCapture(0)
-        detect_motion(cap,db)
+        
         if detection_r():
             print("Motion detected")
             flash("Motion Detected")

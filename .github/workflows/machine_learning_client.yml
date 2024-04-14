@@ -1,38 +1,32 @@
-name: Python application workflow
+name: Python Application Test
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
   pull_request:
-    branches:
-      - main
+    branches: [ main ]
 
 jobs:
   build:
+
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v2
-      name: Check out repository code
+      name: Checkout code
 
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
-        python-version: '3.8'  # Specify the Python version.
+        python-version: '3.8'  # Adjust the Python version as necessary
 
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements.txt
+        pip install pytest  # Assuming pytest is used for running the tests
+        # If there are other dependencies, install them here or use a requirements.txt file
+        # pip install -r requirements.txt
 
     - name: Run tests
       run: |
-        python -m unittest discover -s test  # Assuming tests are in a directory named 'test'
-
-    # Optional: Add a linting step
-    - name: Lint with flake8
-      run: |
-        pip install flake8
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+        pytest test_app.py  # Adjust the command according to your test runner

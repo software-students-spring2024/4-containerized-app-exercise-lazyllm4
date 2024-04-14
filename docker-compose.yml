@@ -1,13 +1,18 @@
-version: '3.8'
+version: '3'
 services:
+  mongodb:
+    image: mongo
+    ports: 
+      - "27018:27017"
   web-app:
-    build: ./path_to_web_app
+    build: ./web_app
     ports:
-      - "5000:5000"
+      - "5001:5000"
     depends_on:
-      - backend
-
-  backend:
-    build: ./path_to_backend
+      - mongodb
+  machine_learning_client:
+    build: ./machine_learning_client
     ports:
       - "8000:8000"
+    depends_on:
+      - mongodb
