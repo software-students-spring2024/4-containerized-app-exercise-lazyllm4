@@ -1,28 +1,27 @@
-name: machine_learning_client_test
-
-on:
-  pull_request:
-    branches:
-      - main
-
+name: machine_learning_client CI / CD
+on: [push, pull_request]
 jobs:
-  always_pass:
+  build:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10"]
     steps:
       - uses: actions/checkout@v3
-        name: Checkout code
-
-      - name: Set up Python
+      - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
-          python-version: '3.9' # Assuming you are using Python 3.9
-
-      - name: Install dependencies and run tests
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
         run: |
-          echo "Installing dependencies..."
-          pip install pytest # Assuming pytest is used for tests
-          echo "Running tests..."
-          pytest || true # The '|| true' ensures this command always succeeds
-          
-      - name: Final step that always succeeds
-        run: echo "This workflow will always show a 'passing' status."
+          cd machine_learning_client
+          python -m pip install --upgrade pip
+          pip install --user pipenv
+          pipenv --python ${{ matrix.python-version }}
+          pipenv install pytest
+          pipenv install
+      - name: Run tests
+        run: |
+          cd machine_learning_client
+          pipenv run pytest
