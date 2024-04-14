@@ -1,5 +1,5 @@
 ![Lint-free](https://github.com/nyu-software-engineering/containerized-app-exercise/actions/workflows/lint.yml/badge.svg)
-![machine_learning_client CI/CD](https://github.com/software-students-spring2024/4-containerized-app-exercise-lazyllm4/actions/workflows/machine_learning_client.yml/badge.svg)
+[![machine_learning_client CI / CD](https://github.com/software-students-spring2024/4-containerized-app-exercise-lazyllm4/actions/workflows/machine_learning_client.yml/badge.svg?branch=william%2Ffix)](https://github.com/software-students-spring2024/4-containerized-app-exercise-lazyllm4/actions/workflows/machine_learning_client.yml)
 ![web_app CI/CD](https://github.com/software-students-spring2024/4-containerized-app-exercise-lazyllm4/actions/workflows/web_app.yml/badge.svg)
 
 
