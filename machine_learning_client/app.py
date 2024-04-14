@@ -22,7 +22,7 @@ CAMERA_INDEX = 0
 
 # Setup MongoDB connection
 def init_db():
-    client = MongoClient(MONGO_URI, tls=True, tlsAllowInvalidCertificates=True)
+    client = MongoClient(os.getenv("MONGO_URI", "mongodb://mongodb:27017/"))
     return client[DATABASE_NAME]
 
 # Assume that sensor_details is a dictionary with sensor info
