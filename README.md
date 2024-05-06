@@ -16,7 +16,7 @@ enter following command
 
 `docker network create project4`
 
-`cd machine_learning_client`
+`cd web_app`
 
 `docker build -t web_app_image .`
 
@@ -24,7 +24,7 @@ enter following command
 
 2. start a new terminal
 
-`cd web_app`
+`cd machine_learning_client`
 
 `docker build -t ml_client_image .`
 
